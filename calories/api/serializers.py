@@ -12,16 +12,16 @@ class UserSerializer(serializers.ModelSerializer):
             }
         }
 
-        def create(self, validated_data):
-            password = validated_data.pop('password', None)
-            instance = self.Meta.model(**validated_data)
-            if password is not None and len(password) >= 8:
-                instance.set_password(password)
-                instance.save()
-            else:
-                raise serializers.ValidationError(
-                    {'password': 'Password must be at least 8 characters long'})
-            return instance
+    def create(self, validated_data):
+        password = validated_data.pop('password', None)
+        instance = self.Meta.model(**validated_data)
+        if password is not None and len(password) >= 8:
+            instance.set_password(password)
+            instance.save()
+        else:
+            raise serializers.ValidationError(
+                {'password': 'Password must be at least 8 characters long'})
+        return instance
 
 
 class CaloriesSerializer(serializers.ModelSerializer):
