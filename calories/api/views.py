@@ -50,3 +50,16 @@ class LoginUser(APIView):
         response = Response(response_data)
         response['Authorization'] = f'Bearer {access_token}'
         return response
+
+
+class Calories(APIView):
+    queryset = CaloriesInput.objects.all()
+    serializer_class = CaloriesInput
+    permission_classes = [IsAuthenticated]
+
+    def post(self, request):
+        serializer = CaloriesSerializer(data=request.data)
+        serializer.is_valid(raise_exception=True)
+        serializer.validated_data['user'] = request.user
+        serializer.save()
+        return Response(serializer.data, status=status.HTTP_201_CREATED)

@@ -25,13 +25,26 @@ class UserSerializer(serializers.ModelSerializer):
 
 
 class CaloriesSerializer(serializers.ModelSerializer):
+    username = serializers.CharField(write_only=True)
+
     class Meta:
         model = CaloriesInput
         fields = ['name', 'number_of_calories',
-                  'description', 'date', 'time']
+                  'description', 'date', 'time', 'username']
 
-        def validate(self, data):
-            if data['number_of_calories'] < 0:
-                raise serializers.ValidationError(
-                    {'Error': 'Number of calories can not be less than 0'})
-            return data
+    def validate(self, data):
+        if data['number_of_calories'] < 0:
+            raise serializers.ValidationError(
+                {'Error': 'Number of calories cannot be less than 0'})
+        return data
+
+    def create(self, validated_data):
+        username = validated_data.pop('username', None)
+
+        user = UserDetail.objects.get(username=username)
+
+        validated_data['user'] = user
+        instance = self.Meta.model(**validated_data)
+        instance.save()
+
+        return instance
