@@ -6,6 +6,11 @@ from .models import UserDetail, CaloriesInput
 from rest_framework.permissions import IsAuthenticated
 from rest_framework.exceptions import AuthenticationFailed
 from rest_framework_simplejwt.tokens import RefreshToken
+import os
+import requests
+
+app_id = os.getenv('APPLICATION_ID')
+app_key = os.getenv('APPLICATION_KEY')
 
 
 class EndPoints(APIView):
@@ -60,6 +65,27 @@ class Calories(APIView):
     def post(self, request):
         serializer = CaloriesSerializer(data=request.data)
         serializer.is_valid(raise_exception=True)
+        if 'number_of_calories' not in serializer.validated_data or serializer.validated_data['number_of_calories'] is None:
+            food_name = serializer.validated_data['name']
+            nutritionix_api_url = "https://trackapi.nutritionix.com/v2/natural/nutrients"
+            headers = {
+                "x-app-id": app_id,
+                "x-app-key": app_key,
+                "Content-Type": "application/json",
+            }
+            params = {
+                'query': food_name
+            }
+            response = requests.post(
+                nutritionix_api_url, headers=headers, json=params)
+            if response.status_code == 200:
+                nutrition_data = response.json()
+                serializer.validated_data['number_of_calories'] = (
+                    nutrition_data['foods'][0]['nf_calories'])
+            else:
+                raise Response({'error': 'Could not find data'},
+                               status=status.HTTP_404_NOT_FOUND)
+
         serializer.validated_data['user'] = request.user
         serializer.save()
         return Response(serializer.data, status=status.HTTP_201_CREATED)
