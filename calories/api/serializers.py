@@ -1,5 +1,6 @@
 from rest_framework import serializers
 from .models import UserDetail, CaloriesInput
+from rest_framework import serializers
 
 
 class UserSerializer(serializers.ModelSerializer):

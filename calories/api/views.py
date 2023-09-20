@@ -9,6 +9,7 @@ from rest_framework_simplejwt.tokens import RefreshToken
 import os
 import requests
 
+
 app_id = os.getenv('APPLICATION_ID')
 app_key = os.getenv('APPLICATION_KEY')
 
